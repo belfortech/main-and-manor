@@ -5,85 +5,64 @@ import Footer from '../../components/Footer';
 import Preloader from '../../components/Preloader';
 import JournalModal from '../../components/Modals/JournalModal'
 
-import story1 from '../../assets/images/story1.png'
+import {fetchBlogs, fetchBlogCategories} from '../../services/api'
+
 import arrowright from '../../assets/images/ArrowRight2.png'
 import arrow from '../../assets/images/ArrowRight2.png'
-import story2 from '../../assets/images/story2.png'
-import story3 from '../../assets/images/story3.png'
-import article1 from '../../assets/images/article1.png'
-import article2  from '../../assets/images/article2.png'
 import search from '../../assets/images/search.png'
 
-const categories = [
-  'ALL STORIES',
-  'MARKET INSIGHTS',
-  'NEIGHBORHOOD GUIDES',
-  'ARCHITECTURE & DESIGN',
-  'LIVING IN DUBAI',
-  'INVESTMENT STRATEGY'
-];
 
-const journalArticles = [
-  {
-    id: 1,
-    category: 'MARKET INSIGHTS',
-    image: story1,
-    title: "Where Dubai's Property Market Is Heading in 2025",
-    excerpt: "A clear, design-led perspective for buyers, sellers, and investors regarding the shift toward quality driven developments.",
-    date: 'DEC 10, 2025'
-  },
-  {
-    id: 2,
-    category: 'NEIGHBORHOOD GUIDES',
-    image: story2,
-    title: 'Palm Jumeirah vs. Dubai Hills Which Lifestyle Fits You?',
-    excerpt: "Two of Dubai's most sought after communities each offering a completely different way of living. Which one aligns with your story?",
-    date: 'DEC 12, 2025'
-  },
-  {
-    id: 3,
-    category: 'ARCHITECTURE & DESIGN',
-    image: story3,
-    title: 'A Design-Led Guide to Choosing a Home in Dubai',
-    excerpt: 'Because the right home is not just square footage it\'s harmony, flow, and feeling.',
-    date: 'DEC 14, 2025'
-  }
-];
 
-const latestArticles = [
-  {
-    id: 4,
-    category: 'LIVING IN DUBAI',
-    image: article1,
-    title: 'Relocating to Dubai: What You Need to Know',
-    excerpt: "A thoughtful guide to starting a new chapter in one of the world's most dynamic cities.",
-    date: 'DEC 10, 2025'
-  },
-  {
-    id: 5,
-    category: 'INVESTMENT STRATEGY',
-    image: article2,
-    title: 'Top 5 Communities for Investors in 2025',
-    excerpt: "Where clarity, demand, and long-term value meet in Dubai's evolving market.",
-    date: 'DEC 14, 2025'
-  },
-  {
-    id: 6,
-    category: 'MARKET INSIGHTS',
-    image: article1,
-    title: "A Beginner's Guide to Buying Property in Dubai",
-    excerpt: "A clear, confidence building path to owning a home in one of the world's most exciting markets.",
-    date: 'DEC 16, 2025'
-  }
-];
 
 export default function Journal(){
-  const [isModalOpen, SetisModalOpen] = useState(false)
-  const openModal =() => SetisModalOpen(true)
-  const closeModal =() => SetisModalOpen(false)
+  const [blogs, setBlogs] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
 
-  const [activeTab, setActiveTab] = useState('ALL STORIES');
+  const [selectedBlog, setSelectedBlog] = useState<any | null>(null)
+
+  
+
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+
+  const openModal = (blog: any) => {
+    setSelectedBlog(blog)
+    setIsModalOpen(true)
+  }
+  
+  const closeModal = () => {
+    setSelectedBlog(null)
+    setIsModalOpen(false)
+  }
+
+
+  const [activeTab, setActiveTab] = useState('all-stories');
   const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    Promise.all([fetchBlogs(), fetchBlogCategories()])
+      .then(([blogsData, categoriesData]) => {
+        setBlogs(blogsData);
+        setCategories(categoriesData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const latestBlogs = blogs.slice(0,3);
+
+  const filteredBlogs =
+  activeTab === 'all-stories'
+  ? blogs
+  : blogs.filter(
+    (blog) => blog.category?.slug === activeTab
+  );
+  
 
   useEffect(() =>{
     const timer = setTimeout(() => {
@@ -149,19 +128,34 @@ export default function Journal(){
       <div className="bg-white py-8 sticky top-20 z-40 border-b border-warmSandstone/30">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap gap-4 justify-center">
+
+            {/* All Stories tab */}
+  <motion.button
+    onClick={() => setActiveTab("all-stories")}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`px-6 py-2 text-xs md:text-sm font-semibold tracking-wider uppercase transition-all duration-300 rounded-full ${
+      activeTab === "all-stories"
+        ? "bg-warmSandstone text-white"
+        : "bg-manorIvory text-urbanTaupe hover:bg-warmSandstone/20"
+    } font-montserrat`}
+  >
+    All Stories
+  </motion.button>
+
             {categories.map((category) => (
               <motion.button
-                key={category}
-                onClick={() => setActiveTab(category)}
+                key={category.id}
+                onClick={() => setActiveTab(category.slug)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`px-6 py-2 text-xs md:text-sm font-semibold tracking-wider uppercase transition-all duration-300 rounded-full ${
-                  activeTab === category
+                  activeTab === category.slug
                     ? 'bg-warmSandstone text-white'
                     : 'bg-manorIvory text-urbanTaupe hover:bg-warmSandstone/20'
                 } font-montserrat`}
               >
-                {category}
+                {category.name}
               </motion.button>
             ))}
           </div>
@@ -186,9 +180,9 @@ export default function Journal(){
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {journalArticles.map((article, index) => (
+            {filteredBlogs.map((blog, index) => (
               <motion.div
-                key={article.id}
+                key={blog.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -196,25 +190,26 @@ export default function Journal(){
               >
                 <div className="relative overflow-hidden rounded-lg mb-4">
                   <motion.img
-                    src={article.image}
-                    alt={article.title}
+                    src={blog.image}
+                    alt={blog.title}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <span className="absolute top-4 left-4 bg-warmSandstone/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-lato font-semibold">
-                    {article.category}
+                    {blog.category?.name}
                   </span>
                 </div>
 
                 <div className="space-y-3">
                   <h3 className="text-lg md:text-xl text-white font-semibold font-playfair group-hover:text-warmSandstone transition">
-                    {article.title}
+                    {blog.title}
                   </h3>
                   <p className="text-sm text-white/70 font-lato leading-relaxed">
-                    {article.excerpt}
+                    {blog.excerpt}
                   </p>
                   <button
-                    onClick={openModal}
+                    onClick={() => openModal(blog)}
+
                     className="flex items-center gap-2 text-warmSandstone hover:text-white transition group/btn"
                   >
                     <span className="text-sm uppercase tracking-wider font-montserrat">Read Story</span>
@@ -241,9 +236,9 @@ export default function Journal(){
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Articles Column */}
             <div className="lg:col-span-2 space-y-8">
-              {latestArticles.slice(0, 2).map((article) => (
+              {latestBlogs.slice(0, 2).map((blog) => (
                 <motion.div
-                  key={article.id}
+                  key={blog.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -251,26 +246,37 @@ export default function Journal(){
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <img
-                      src={article.image}
-                      alt={article.title}
+                      src={blog.image}
+                      alt={blog.title}
                       className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
 
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-xs uppercase text-urbanTaupe font-montserrat tracking-wider">
-                      {article.category}
+                      {blog.category?.name}
                     </span>
-                    <span className="text-xs text-urbanTaupe font-lato">{article.date}</span>
+                    
+                    <span className="text-xs text-urbanTaupe font-lato">
+                    {blog.created_at
+                   ? new Date(blog.created_at).toLocaleDateString("en-US", {
+                   year: "numeric",
+                   month: "short",
+                   day: "2-digit",
+                  })
+                : ""}
+
+                   </span>
                   </div>
 
                   <h3 className="text-xl md:text-2xl text-charcoalNoir font-semibold font-playfair mb-3 group-hover:text-warmSandstone transition">
-                    {article.title}
+                    {blog.title}
                   </h3>
                   <p className="text-sm text-deepManorSlate font-lato mb-4">
-                    {article.excerpt}
+                    {blog.excerpt}
                   </p>
-                  <button className="flex items-center gap-2 text-warmSandstone hover:text-urbanTaupe transition">
+                  <button onClick={() => openModal(blog)}
+                  className="flex items-center gap-2 text-warmSandstone hover:text-urbanTaupe transition">
                     <span className="text-sm uppercase tracking-wider font-montserrat">Read Story</span>
                     <motion.img
                       src={arrow}
@@ -304,13 +310,14 @@ export default function Journal(){
                   Most Popular
                 </h3>
                 <div className="space-y-6">
-                  {journalArticles.map((article, index) => (
+                  {blogs.map((blog, index) => (
                     <div key={index} className="border-b border-warmSandstone/30 pb-4 last:border-0">
                       <p className="text-xs text-urbanTaupe uppercase mb-2 font-montserrat tracking-wider">
-                        {article.category}
+                        {blog.category?.name}
                       </p>
-                      <p className="text-sm text-charcoalNoir font-lato hover:text-warmSandstone cursor-pointer transition">
-                        {article.title}
+                      <p onClick={() => openModal(blog)}
+                      className="text-sm text-charcoalNoir font-lato hover:text-warmSandstone cursor-pointer transition">
+                        {blog.title}
                       </p>
                     </div>
                   ))}
@@ -349,9 +356,9 @@ export default function Journal(){
 
           {/* Additional Articles */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {latestArticles.slice(2).map((article) => (
+            {latestBlogs.slice(2).map((blog) => (
               <motion.div
-                key={article.id}
+                key={blog.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -359,26 +366,37 @@ export default function Journal(){
               >
                 <div className="relative overflow-hidden rounded-lg mb-4">
                   <img
-                    src={article.image}
-                    alt={article.title}
+                    src={blog.image}
+                    alt={blog.title}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
 
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-xs uppercase text-urbanTaupe font-montserrat tracking-wider">
-                    {article.category}
+                    {blog.category?.name}
                   </span>
-                  <span className="text-xs text-urbanTaupe font-lato">{article.date}</span>
+                  <span className="text-xs text-urbanTaupe font-lato">
+                  {blog.created_at
+               ? new Date(blog.created_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+              })
+           : ""}
+
+                     </span>
                 </div>
 
+
                 <h3 className="text-lg font-semibold text-charcoalNoir font-playfair mb-3 group-hover:text-warmSandstone transition">
-                  {article.title}
+                  {blog.title}
                 </h3>
                 <p className="text-sm text-deepManorSlate font-lato mb-4">
-                  {article.excerpt}
+                  {blog.excerpt}
                 </p>
-                <button className="flex items-center gap-2 text-warmSandstone hover:text-urbanTaupe transition">
+                <button onClick={() => openModal(blog)}
+                className="flex items-center gap-2 text-warmSandstone hover:text-urbanTaupe transition">
                   <span className="text-sm uppercase tracking-wider font-montserrat">Read Story</span>
                   <motion.img
                     src={arrow}
@@ -423,7 +441,14 @@ export default function Journal(){
         </div>
       </div>
 
-      <JournalModal isOpen={isModalOpen} onClose={closeModal} />
+      
+{isModalOpen && selectedBlog && (
+  <JournalModal
+    isOpen={isModalOpen}
+    onClose={closeModal}
+    blog={selectedBlog}
+  />
+)}
       <Footer/>
     </>
   )

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 import article1 from '../../assets/images/article1.png'
 import calendar from '../../assets/images/calendar.png'
 import xcircle from '../../assets/images/XCircle.png'
@@ -8,10 +9,14 @@ import xcircle from '../../assets/images/XCircle.png'
 interface JournalModalProps{
     isOpen:boolean
     onClose:() => void
+    blog:any
 }
 
-const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose}) =>{
-    if (!isOpen) return null;
+
+const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, blog}) =>{
+   
+    if (!isOpen || !blog) return null;
+
 
     return(
         <AnimatePresence>
@@ -35,8 +40,8 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose}) =>{
                         {/* Hero Image */}
                         <div className="relative">
                             <img
-                                src={article1}
-                                alt="article"
+                                src={blog.image}
+                                alt={blog.title}
                                 className="w-full h-64 md:h-96 object-cover rounded-t-2xl"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-t-2xl"></div>
@@ -48,99 +53,60 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose}) =>{
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="flex items-center gap-2 text-urbanTaupe">
                                     <img src={calendar} alt="calendar" className="w-5 h-5"/>
-                                    <span className="text-sm font-lato">Oct 12, 2024</span>
+                                    <span className="text-sm font-lato">{blog.created_at
+                               ? new Date(blog.created_at).toLocaleDateString("en-US", {
+                               year: "numeric",
+                               month: "short",
+                               day: "2-digit",
+                             })
+                           : ""}
+                         </span>
                                 </div>
                                 <span className="w-1 h-1 rounded-full bg-warmSandstone"></span>
-                                <span className="text-sm text-urbanTaupe font-montserrat tracking-wider uppercase">Market Insights</span>
+                                <span className="text-sm text-urbanTaupe font-montserrat tracking-wider uppercase">{blog.category?.name}</span>
+
                             </div>
 
                             {/* Title */}
                             <h1 className="text-3xl md:text-4xl font-bold text-charcoalNoir mb-6 font-playfair leading-tight">
-                                Where Dubai's Property Market Is Heading in 2025
+                            {blog.title} 
                             </h1>
 
                             {/* Introduction */}
                             <p className="text-base md:text-lg text-deepManorSlate mb-8 font-lato leading-relaxed">
-                                Dubai's real estate market has entered a new chapter—one defined by stability, long-term confidence,
-                                and a shift toward quality-driven developments. As we move through 2025, the focus is no longer just on rapid growth.
-                                It's on sustainable value, architectural refinement, and communities built for real life.
+                            {blog.content}
                             </p>
 
                             {/* Content Sections */}
                             <div className="space-y-8">
                                 {/* Section 1 */}
-                                <div>
-                                    <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
-                                        1. Demand Remains Strong—But More Considered
+                                {blog.sections?.map((section:any, index:number) =>(
+                                    <div key={index}>
+                                        <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
+                                        {index + 1}. {section.title}
                                     </h2>
                                     <p className="text-base text-deepManorSlate font-lato leading-relaxed">
-                                        Over the last four years, Dubai saw record-breaking demand from global buyers.
-                                        In 2025, that demand continues—but with a noticeable shift. Buyers are asking better questions,
-                                        investors are choosing communities with long-term fundamentals,
-                                        and end-users are prioritizing lifestyle, schools, and design over pure speculation.
+                                        {section.content}
                                     </p>
-                                </div>
-
-                                {/* Section 2 */}
-                                <div>
-                                    <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
-                                        2. End-User Communities Are Leading the Market
-                                    </h2>
-                                    <p className="text-base text-deepManorSlate font-lato leading-relaxed">
-                                        Communities built around greenery, walkability, and modern amenities are
-                                        outperforming high-rise clusters. Top performers include Dubai Hills (lifestyle, schools, parks), Arabian Ranches
-                                        (mature suburban charm), and Sobha Hartland (quality construction).
-                                        These areas offer emotional and functional value—not just ROI.
-                                    </p>
-                                </div>
-
-                                {/* Section 3 */}
-                                <div>
-                                    <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
-                                        3. The Rise of Architecturally-Led Developments
-                                    </h2>
-                                    <p className="text-base text-deepManorSlate font-lato leading-relaxed">
-                                        Design is becoming a decision-maker. Buyers are responding strongly to clean lines,
-                                        high ceilings, functional layouts, and nature-integrated communities.
-                                        Developers focusing on craftsmanship are seeing the most absorption.
-                                    </p>
-                                </div>
-
-                                {/* Section 4 */}
-                                <div>
-                                    <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
-                                        4. Off-Plan Remains Attractive—But Buyers Are More Selective
-                                    </h2>
-                                    <p className="text-base text-deepManorSlate font-lato leading-relaxed">
-                                        Off-plan demand continues, especially in waterfront projects and
-                                        master-planned communities. However, buyers in 2025 want transparency:
-                                        delivery timelines, quality assurance, and real value—not hype.
-                                    </p>
-                                </div>
-
-                                {/* Section 5 */}
-                                <div>
-                                    <h2 className="text-xl font-semibold text-charcoalNoir mb-3 font-playfair">
-                                        5. Rental Market Stays Competitive
-                                    </h2>
-                                    <p className="text-base text-deepManorSlate font-lato leading-relaxed">
-                                        Demand for rentals remains extremely strong due to steady
-                                        population growth and global relocations. Popular rental communities like Dubai Marina,
-                                        Downtown, and JVC continue to offer attractive yields.
-                                    </p>
-                                </div>
+                                    </div>
+                                ))}
+                               
+                                
 
                                 {/* Conclusion */}
-                                <div className="bg-manorIvory p-6 md:p-8 rounded-lg">
+                                {blog.conclusion && (
+                                    <div className="bg-manorIvory p-6 md:p-8 rounded-lg">
                                     <h2 className="text-xl font-semibold text-charcoalNoir mb-4 font-playfair">
                                         Conclusion
                                     </h2>
+
                                     <p className="text-base text-deepManorSlate font-lato leading-relaxed italic">
-                                        The Dubai market of 2025 is sophisticated, confident, and design-driven. It rewards thoughtful decisions grounded
-                                        in lifestyle and long-term value. At Main & Manor, we believe every home should fit your
-                                        story—and understanding the market is the first step in writing it.
+                                        {blog.conclusion}
                                     </p>
-                                </div>
+                                    </div>
+                                )}
+                                
+                                
                             </div>
 
                             {/* Divider */}

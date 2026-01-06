@@ -5,22 +5,12 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Preloader from '../../components/Preloader';
 
+import { fetchFeaturedProperties, fetchOffPlanProperties } from "../../services/api";
+
+
 import backgroundImage from '../../assets/images/listings2.png';
 import Pagination from '../../components/Pagination';
 
-import image30 from '../../assets/images/image30.png';
-import image31 from '../../assets/images/image31.png';
-import image32 from '../../assets/images/image32.png';
-import image33 from '../../assets/images/image33.png';
-import image34 from '../../assets/images/image34.png';
-import image35 from '../../assets/images/image35.png';
-
-import image36 from '../../assets/images/image36.png';
-import image37 from '../../assets/images/image37.png';
-import image38 from '../../assets/images/image38.png';
-import image39 from '../../assets/images/image39.png';
-import image40 from '../../assets/images/image40.png';
-import image41 from '../../assets/images/image41.png';
 import arrowright from '../../assets/images/ArrowRight.png';
 
 import caretdown from '../../assets/images/CaretDown.png';
@@ -44,163 +34,30 @@ interface PropertyItem {
   size: string;
 }
 
-const sectionOneProperties: PropertyItem[] = [
-  {
-    id: 1,
-    type: 'PENTHOUSE',
-    status: 'FOR SELL',
-    image: image30,
-    location: 'PALM JUMEIRAH',
-    title: 'The Royal Penthouse',
-    price: 'AED 42,500,000',
-    beds: 4,
-    baths: 6,
-    size: '5200 sqft',
-  },
-  {
-    id: 2,
-    type: 'VILLA',
-    status: 'FOR SELL',
-    image: image31,
-    location: 'PALM JUMEIRAH',
-    title: 'Frond G Signature Villa',
-    price: 'AED 85,000,000',
-    beds: 6,
-    baths: 7,
-    size: '9500 sqft',
-  },
-  {
-    id: 3,
-    type: 'VILLA',
-    status: 'FOR SELL',
-    image: image32,
-    location: 'DUBAI HILLS',
-    title: 'Golf Course Mansion',
-    price: 'AED 32,000,000',
-    beds: 7,
-    baths: 8,
-    size: '11000 sqft',
-  },
-
-  {
-    id: 4,
-    type: 'PENTHOUSE',
-    status: 'FOR SELL',
-    image: image33,
-    location: 'PALM JUMEIRAH',
-    title: 'The Royal Penthouse',
-    price: 'AED 42,500,000',
-    beds: 4,
-    baths: 6,
-    size: '5200 sqft',
-  },
-  {
-    id: 5,
-    type: 'VILLA',
-    status: 'FOR SELL',
-    image: image34,
-    location: 'PALM JUMEIRAH',
-    title: 'Frond G Signature Villa',
-    price: 'AED 85,000,000',
-    beds: 6,
-    baths: 7,
-    size: '9500 sqft',
-  },
-  {
-    id: 6,
-    type: 'VILLA',
-    status: 'FOR SELL',
-    image: image35,
-    location: 'DUBAI HILLS',
-    title: 'Golf Course Mansion',
-    price: 'AED 32,000,000',
-    beds: 7,
-    baths: 8,
-    size: '11000 sqft',
-  },
-];
-
-{
-  /* ==== for section 2 === */
-}
-const sectionTwoProperties: PropertyItem[] = [
-  {
-    id: 7,
-    type: 'PENTHOUSE',
-    status: 'FOR SELL',
-    image: image36,
-    location: 'PALM JUMEIRAH',
-    title: 'The Royal Penthouse',
-    price: 'AED 42,500,000',
-    beds: 4,
-    baths: 6,
-    size: '5200 sqft',
-  },
-  {
-    id: 8,
-    type: 'VILLA',
-    status: 'FOR RENT',
-    image: image37,
-    location: 'PALM JUMEIRAH',
-    title: 'Frond G Signature Villa',
-    price: 'AED 85,000,000',
-    beds: 6,
-    baths: 7,
-    size: '9500 sqft',
-  },
-  {
-    id: 9,
-    type: 'VILLA',
-    status: 'FOR RENT',
-    image: image38,
-    location: 'DUBAI HILLS',
-    title: 'Golf Course Mansion',
-    price: 'AED 32,000,000',
-    beds: 7,
-    baths: 8,
-    size: '11000 sqft',
-  },
-
-  {
-    id: 10,
-    type: 'PENTHOUSE',
-    status: 'FOR SELL',
-    image: image39,
-    location: 'PALM JUMEIRAH',
-    title: 'The Royal Penthouse',
-    price: 'AED 42,500,000',
-    beds: 4,
-    baths: 6,
-    size: '5200 sqft',
-  },
-  {
-    id: 11,
-    type: 'VILLA',
-    status: 'FOR RENT',
-    image: image40,
-    location: 'PALM JUMEIRAH',
-    title: 'Frond G Signature Villa',
-    price: 'AED 85,000,000',
-    beds: 6,
-    baths: 7,
-    size: '9500 sqft',
-  },
-  {
-    id: 12,
-    type: 'VILLA',
-    status: 'FOR RENT',
-    image: image41,
-    location: 'DUBAI HILLS',
-    title: 'Golf Course Mansion',
-    price: 'AED 32,000,000',
-    beds: 7,
-    baths: 8,
-    size: '11000 sqft',
-  },
-];
 
 export default function Listings() {
   const [loading, setLoading] = useState(true);
+
+
+  
+const [featuredProperties, setFeaturedProperties] = useState<PropertyItem[]>([]);
+const [offPlanProperties, setOffPlanProperties] = useState<PropertyItem[]>([]);
+  
+useEffect(() => {
+  Promise.all([
+    fetchFeaturedProperties(),
+    fetchOffPlanProperties(),
+  ])
+    .then(([featured, offplan]) => {
+      setFeaturedProperties(featured);
+      setOffPlanProperties(offplan);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error(err);
+      setLoading(false);
+    });
+}, []);
 
   const [openMenu1, setOpenMenu1] = useState<number | null>(null);
   const [openMenu2, setOpenMenu2] = useState<number | null>(null);
@@ -208,8 +65,8 @@ export default function Listings() {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const pageSize = 6;
-  const totalPages1 = Math.ceil(sectionOneProperties.length / pageSize);
-  const totalPages2 = Math.ceil(sectionTwoProperties.length / pageSize);
+  const totalPages1 = Math.ceil(featuredProperties.length / pageSize);
+  const totalPages2 = Math.ceil(offPlanProperties.length / pageSize);
 
   const navigate = useNavigate();
 
@@ -331,7 +188,8 @@ export default function Listings() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sectionOneProperties.map((property, index) => (
+            
+            {featuredProperties.map((property, index) => (
               <motion.div
                 key={property.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -441,7 +299,7 @@ export default function Listings() {
         <div className="py-8 px-6 md:px-16 lg:px-32 bg-manorIvory">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-deepManorSlate font-lato">
-              Showing {sectionOneProperties.length} of {sectionOneProperties.length} properties
+              Showing {featuredProperties.length} of {featuredProperties.length} properties
             </p>
 
             <div className="flex items-center gap-4">
@@ -530,7 +388,7 @@ export default function Listings() {
 
           {/* Properties Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sectionTwoProperties.map((property, index) => (
+            {offPlanProperties.map((property, index) => (
               <motion.div
                 key={property.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -640,7 +498,7 @@ export default function Listings() {
         <div className="py-8 px-6 md:px-16 lg:px-32 bg-white">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-deepManorSlate font-lato">
-              Showing {sectionTwoProperties.length} of {sectionTwoProperties.length} properties
+              Showing {offPlanProperties.length} of {offPlanProperties.length} properties
             </p>
 
             <div className="flex items-center gap-4">

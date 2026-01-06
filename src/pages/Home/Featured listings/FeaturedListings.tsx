@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchFeaturedProperties } from "../../../services/api";
+
 
 import phonecall from '../../../assets/images/PhoneCall2.png';
 import whatsapplogo from '../../../assets/images/Whatsapp.png';
 import envelope from '../../../assets/images/Envelope2.png';
 
 import Button from '../../../components/ui/Button';
-import { featuredProperties } from '../../../data/properties';
+{/*import { featuredProperties } from '../../../data/properties';*/}
 
 export default function FeaturedListings() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -18,10 +20,29 @@ export default function FeaturedListings() {
     'FOR RENT': 'bg-manorIvory text-charcoalNoir',
   };
 
+  const [listing, setListing] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    fetchFeaturedProperties()
+      .then((data) => {
+        setListing(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) {
+    return <p className="text-white">Loading featured listings...</p>;
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {featuredProperties.map((listing) => (
+        {listing.map((listing) => (
           <motion.div
             key={listing.id}
             className="glass-panel bg-ebony/60 text-sand overflow-hidden"

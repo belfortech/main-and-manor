@@ -1,4 +1,5 @@
-
+import React,{useState, useEffect} from 'react';
+import { fetchCommunities } from '../../services/api';
 import community1 from '../../assets/images/community1.png';
 import community2 from '../../assets/images/community2.png';
 import community3 from '../../assets/images/community3.png';
@@ -6,6 +7,7 @@ import community4 from '../../assets/images/community4.png';
 import community5 from '../../assets/images/community5.png';
 
 export default function Communitiessection() {
+  {/*
   const communities = [
     { image: community1, name: 'Dubai Hills' },
     { image: community2, name: 'Sobha Hartland' },
@@ -13,6 +15,14 @@ export default function Communitiessection() {
     { image: community4, name: 'Downtown Dubai' },
     { image: community5, name: 'Dubai Hills' },
   ];
+  */}
+
+  const [communities, setCommunities] = useState<any[]>([]);
+
+  useEffect(()=>{
+    fetchCommunities().then(setCommunities);
+  }, []);
+  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4">
