@@ -40,3 +40,19 @@ export async function fetchCommunities(){
     const res = await fetch("http://127.0.0.1:8000/api/communities/");
     return res.json();
 }
+
+export async function fetchSuggestedProperties(id: number) {
+    const res = await fetch(
+      `http://127.0.0.1:8000/api/properties/?exclude=${id}&limit=6`
+    );
+    if (!res.ok) throw new Error("Failed to fetch suggested properties");
+    return res.json();
+  }
+
+  
+  export async function fetchAllProperties() {
+    const res = await fetch("http://127.0.0.1:8000/api/properties/");
+    if (!res.ok) throw new Error("Failed to fetch properties");
+    return res.json();
+  }
+  

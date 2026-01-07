@@ -25,7 +25,7 @@ export default function Footer() {
             transition={{ duration: 0.6 }}
             className="flex flex-col gap-6"
           >
-            <img src={logo} alt="Main & Manor Logo" className="h-24 w-auto drop-shadow-2xl" />
+            <img src={logo} alt="Main & Manor Logo" className="h-24 w-24 drop-shadow-2xl" />
             <p className="text-base text-manorIvory/90 italic font-spectral leading-relaxed">
               "Homes that fit your story."
             </p>

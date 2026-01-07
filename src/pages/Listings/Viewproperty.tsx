@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import { useNavigate , useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { properties, offPlanProperties } from '../../data/properties';
-import type { Property } from '../../data/properties';
+import { fetchPropertyById } from '../../services/api';
+import { fetchAllProperties } from '../../services/api';
+
 
 import location from '../../assets/images/location.png'
 import bed from '../../assets/images/Bed.png'
@@ -13,21 +14,59 @@ import phonecall from '../../assets/images/PhoneCall2.png'
 import whatsapplogo from '../../assets/images/Whatsapp.png'
 import envelope from '../../assets/images/Envelope.png'
 
+
+interface PropertyItem {
+  id: number;
+  type: string;
+  status: string;
+  image: string;
+  location: string;
+  title: string;
+  price: string;
+  beds: number;
+  baths: number;
+  size: string;
+}
+
 export default function Viewproperty(){
 
-  // Combine all properties from centralized data
-  const allProperties: Property[] = [...properties, ...offPlanProperties];
 
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const property = allProperties.find(
-    (p) => p.id === Number(id)
-  );
+  
+  const [loading, setLoading] = useState(true);
+  const [property, setProperty] = useState<PropertyItem | null>(null);
+  const [suggestedProperties, setSuggestedProperties] = useState<PropertyItem[]>([]);
+  const [openMenu2, setOpenMenu2] = useState<number | null>(null);
 
-  // Get suggested properties (random 6 properties excluding current one)
-  const suggestedProperties = allProperties
-    .filter((p) => p.id !== Number(id))
-    .slice(0, 6);
+
+
+  useEffect(() => {
+    if (!id) return;
+  
+    Promise.all([
+      fetchPropertyById(Number(id)),
+      fetchAllProperties()
+    ])
+      .then(([propertyData, allProperties]) => {
+        setProperty(propertyData);
+  
+        const suggestions = allProperties
+          .filter((p: PropertyItem) => p.id !== Number(id))
+          .slice(0, 6);
+  
+        setSuggestedProperties(suggestions);
+        setLoading(false);
+      })
+      .catch(() => {
+        setProperty(null);
+        setLoading(false);
+      });
+  }, [id]);
+  
+
+  
 
   if (!property) {
     return (
@@ -41,10 +80,8 @@ export default function Viewproperty(){
     );
   }
 
-const [openMenu2, setOpenMenu2] = useState<number | null>(null);
 
 
-    const navigate = useNavigate();
     return(
         <>
         <Navbar/>
@@ -283,7 +320,7 @@ const [openMenu2, setOpenMenu2] = useState<number | null>(null);
     className="mt-2 transition-transform duration-200 hover:translate-y-2"
   >
     <div className="relative">
-      <img src={suggProp.image} alt={suggProp.title} className="max-w-full h-auto object-contain"/>
+      <img src={suggProp.image} alt={suggProp.title} className="w-full h-64 object-cover"/>
 
       <span className="absolute top-2 left-2 bg-white/10 backdrop-blur-md text-white text-xs px-2 py-1 rounded font-lato">
         {suggProp.type}

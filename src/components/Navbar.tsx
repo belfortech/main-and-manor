@@ -54,7 +54,7 @@ export default function Navbar() {
               <motion.img
                 src={logo}
                 alt="Main & Manor logo"
-                className="h-14 w-auto drop-shadow-lg"
+                className="h-24 w-auto drop-shadow-lg"
                 whileHover={{ scale: 1.03 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 20 }}
               />
